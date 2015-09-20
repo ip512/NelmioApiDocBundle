@@ -37,12 +37,8 @@ class ApiDocExtractorTest extends WebTestCase
         $extractor = $container->get('nelmio_api_doc.extractor.api_doc_extractor');
         set_error_handler(array($this, 'handleDeprecation'));
         $data = $extractor->all();
+        $routes = $extractor->getRoutes();
         restore_error_handler();
-
-        $httpsKey = 20;
-        if (class_exists('Dunglas\ApiBundle\DunglasApiBundle')) {
-            $httpsKey += self::NB_ROUTES_ADDED_BY_DUNGLAS_API_BUNDLE;
-        }
 
         $this->assertTrue(is_array($data));
         $this->assertCount(self::$ROUTES_QUANTITY_DEFAULT, $data);
@@ -50,51 +46,45 @@ class ApiDocExtractorTest extends WebTestCase
         $cacheFile = $container->getParameter('kernel.cache_dir') . '/api-doc.cache.' . ApiDoc::DEFAULT_VIEW;
         $this->assertFileExists($cacheFile);
         $this->assertStringEqualsFile($cacheFile, serialize($data));
+        $testedRoutes = 0;
 
         foreach ($data as $key => $d) {
             $this->assertTrue(is_array($d));
             $this->assertArrayHasKey('annotation', $d);
             $this->assertArrayHasKey('resource', $d);
 
-            $this->assertInstanceOf('Nelmio\ApiDocBundle\Annotation\ApiDoc', $d['annotation']);
-            $this->assertInstanceOf('Symfony\Component\Routing\Route', $d['annotation']->getRoute());
+            $annotation = $d['annotation'];
+            $this->assertInstanceOf('Nelmio\ApiDocBundle\Annotation\ApiDoc', $annotation);
+            $this->assertInstanceOf('Symfony\Component\Routing\Route', $annotation->getRoute());
             $this->assertNotNull($d['resource']);
+
+            if ($annotation->getRoute() === $routes['test_route_1']) {
+                $array = $annotation->toArray();
+                $this->assertTrue($annotation->isResource());
+                $this->assertEquals('index action', $annotation->getDescription());
+                $this->assertNotEmpty($array['filters']);
+                $this->assertNull($annotation->getInput());
+                $testedRoutes++;
+            }
+            if ($annotation->getRoute() === $routes['test_route_2']) {
+                $this->assertFalse($annotation->isResource());
+                $this->assertEquals('create test', $annotation->getDescription());
+                $this->assertEquals('Nelmio\ApiDocBundle\Tests\Fixtures\Form\TestType', $annotation->getInput());
+                $testedRoutes++;
+            }
+            if ($annotation->getRoute() === $routes['test_route_14']) {
+                $this->assertTrue($annotation->isResource());
+                $this->assertEquals('post test 2', $annotation->getDescription());
+                $testedRoutes++;
+            }
+            if ($annotation->getRoute() === $routes['test_route_12']) {
+                $this->assertTrue($annotation->getHttps());
+                $testedRoutes++;
+            }
         }
 
-        $a1 = $data[7]['annotation'];
-        $array1 = $a1->toArray();
-        $this->assertTrue($a1->isResource());
-        $this->assertEquals('index action', $a1->getDescription());
-        $this->assertTrue(is_array($array1['filters']));
-        $this->assertNull($a1->getInput());
+        $this->assertEquals(4, $testedRoutes);
 
-        $a1 = $data[7]['annotation'];
-        $array1 = $a1->toArray();
-        $this->assertTrue($a1->isResource());
-        $this->assertEquals('index action', $a1->getDescription());
-        $this->assertTrue(is_array($array1['filters']));
-        $this->assertNull($a1->getInput());
-
-        $a2 = $data[8]['annotation'];
-        $array2 = $a2->toArray();
-        $this->assertFalse($a2->isResource());
-        $this->assertEquals('create test', $a2->getDescription());
-        $this->assertFalse(isset($array2['filters']));
-        $this->assertEquals('Nelmio\ApiDocBundle\Tests\Fixtures\Form\TestType', $a2->getInput());
-
-        $a2 = $data[9]['annotation'];
-        $array2 = $a2->toArray();
-        $this->assertFalse($a2->isResource());
-        $this->assertEquals('create test', $a2->getDescription());
-        $this->assertFalse(isset($array2['filters']));
-        $this->assertEquals('Nelmio\ApiDocBundle\Tests\Fixtures\Form\TestType', $a2->getInput());
-
-        $a4 = $data[11]['annotation'];
-        $this->assertTrue($a4->isResource());
-        $this->assertEquals('TestResource', $a4->getResource());
-
-        $a3 = $data[$httpsKey]['annotation'];
-        $this->assertTrue($a3->getHttps());
     }
 
     public function testGet()

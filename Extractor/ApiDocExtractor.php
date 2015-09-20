@@ -94,6 +94,7 @@ class ApiDocExtractor
     /**
      * Extracts annotations from all known routes
      *
+     * @param string $view
      * @return array
      */
     public function all($view = ApiDoc::DEFAULT_VIEW)

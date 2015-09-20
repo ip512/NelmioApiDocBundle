@@ -44,6 +44,13 @@ class DunglasApiParserTest extends WebTestCase
                     'readonly' => false,
                     'dataType' => DataTypes::STRING,
                 ),
+            'id' =>
+                array (
+                    'required' => false,
+                    'description' => '',
+                    'readonly' => false,
+                    'dataType' => DataTypes::INTEGER,
+                ),
         );
 
         $this->assertTrue($parser->supports($item));

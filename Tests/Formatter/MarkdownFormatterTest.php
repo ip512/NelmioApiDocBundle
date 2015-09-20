@@ -35,6 +35,10 @@ _Retrieves the collection of Popo resources._
 
 #### Response ####
 
+id:
+
+  * type: integer
+
 foo:
 
   * type: string
@@ -46,12 +50,21 @@ _Creates a Popo resource._
 
 #### Parameters ####
 
+id:
+
+  * type: integer
+  * required: false
+
 foo:
 
   * type: string
   * required: false
 
 #### Response ####
+
+id:
+
+  * type: integer
 
 foo:
 
@@ -70,6 +83,10 @@ _Retrieves Popo resource._
 
 #### Response ####
 
+id:
+
+  * type: integer
+
 foo:
 
   * type: string
@@ -87,12 +104,21 @@ _Replaces the Popo resource._
 
 #### Parameters ####
 
+id:
+
+  * type: integer
+  * required: false
+
 foo:
 
   * type: string
   * required: false
 
 #### Response ####
+
+id:
+
+  * type: integer
 
 foo:
 

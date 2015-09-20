@@ -480,8 +480,9 @@ class ApiDoc
             $this->host = null;
         }
 
-        $this->uri    = $route->getPattern();
-        $this->method = $route->getRequirement('_method') ?: 'ANY';
+        $this->uri    = $route->getPath();
+        $methods = $route->getMethods();
+        $this->method = empty($methods)?'ANY':implode('|', $methods);
     }
 
     /**
@@ -606,6 +607,7 @@ class ApiDoc
 
     /**
      * @param boolean $deprecated
+     * @return $this
      */
     public function setDeprecated($deprecated)
     {
